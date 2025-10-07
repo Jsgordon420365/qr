@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Tracker & QR Code Detector</title>
+    <style>
+        :root {
+          /* Primitive Color Tokens */
+          --color-white: rgba(255, 255, 255, 1);
+          --color-black: rgba(0, 0, 0, 1);
+          --color-cream-50: rgba(252, 252, 249, 1);
+          --color-cream-100: rgba(255, 255, 253, 1);
+          --color-gray-200: rgba(245, 245, 245, 1);
+          --color-gray-300: rgba(167, 169, 169, 1);
+          --color-gray-400: rgba(119, 124, 124, 1);
+          --color-slate-500: rgba(98, 108, 113, 1);
+          --color-brown-600: rgba(94, 82, 64, 1);
+          --color-charcoal-700: rgba(31, 33, 33, 1);
+          --color-charcoal-800: rgba(38, 40, 40, 1);
+          --color-slate-900: rgba(19, 52, 59, 1);
+          --color-teal-300: rgba(50, 184, 198, 1);
+          --color-teal-400: rgba(45, 166, 178, 1);
+          --color-teal-500: rgba(33, 128, 141, 1);
+          --color-teal-600: rgba(29, 116, 128, 1);
+          --color-teal-700: rgba(26, 104, 115, 1);
+          --color-teal-800: rgba(41, 150, 161, 1);
+          --color-red-400: rgba(255, 84, 89, 1);
+          --color-red-500: rgba(192, 21, 47, 1);
+          --color-orange-400: rgba(230, 129, 97, 1);
+          --color-orange-500: rgba(168, 75, 47, 1);
+
+          /* RGB versions for opacity control */
+          --color-brown-600-rgb: 94, 82, 64;
+          --color-teal-500-rgb: 33, 128, 141;
+          --color-slate-900-rgb: 19, 52, 59;
+          --color-slate-500-rgb: 98, 108, 113;
+          --color-red-500-rgb: 192, 21, 47;
+          --color-red-400-rgb: 255, 84, 89;
+          --color-orange-500-rgb: 168, 75, 47;
+          --color-orange-400-rgb: 230, 129, 97;
+
+          /* Background color tokens (Light Mode) */
+          --color-bg-1: rgba(59, 130, 246, 0.08); /* Light blue */
+          --color-bg-2: rgba(245, 158, 11, 0.08); /* Light yellow */
+          --color-bg-3: rgba(34, 197, 94, 0.08); /* Light green */
+          --color-bg-4: rgba(239, 68, 68, 0.08); /* Light red */
+          --color-bg-5: rgba(147, 51, 234, 0.08); /* Light purple */
+          --color-bg-6: rgba(249, 115, 22, 0.08); /* Light orange */
+          --color-bg-7: rgba(236, 72, 153, 0.08); /* Light pink */
+          --color-bg-8: rgba(6, 182, 212, 0.08); /* Light cyan */
+
+          /* Semantic Color Tokens (Light Mode) */
+          --color-background: var(--color-cream-50);
+          --color-surface: var(--color-cream-100);
+          --color-text: var(--color-slate-900);
+          --color-text-secondary: var(--color-slate-500);
+          --color-primary: var(--color-teal-500);
+          --color-primary-hover: var(--color-teal-600);
+          --color-primary-active: var(--color-teal-700);
+          --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+          --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+          --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
+          --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+          --color-btn-primary-text: var(--color-cream-50);
+          --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+          --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
+          --color-error: var(--color-red-500);
+          --color-success: var(--color-teal-500);
+          --color-warning: var(--color-orange-500);
+          --color-info: var(--color-slate-500);
+          --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
+          --color-select-caret: rgba(var(--color-slate-900-rgb), 0.8);
+
+          /* Common style patterns */
+          --focus-ring: 0 0 0 3px var(--color-focus-ring);
+          --focus-outline: 2px solid var(--color-primary);
+          --status-bg-opacity: 0.15;
+          --status-border-opacity: 0.25;
+          --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23134252' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          --select-caret-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+          /* RGB versions for opacity control */
+          --color-success-rgb: 33, 128, 141;
+          --color-error-rgb: 192, 21, 47;
+          --color-warning-rgb: 168, 75, 47;
+          --color-info-rgb: 98, 108, 113;
+
+          /* Typography */
+          --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system,
+            BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          --font-family-mono: "Berkeley Mono", ui-monospace, SFMono-Regular, Menlo,
+            Monaco, Consolas, monospace;
+          --font-size-xs: 11px;
+          --font-size-sm: 12px;
+          --font-size-base: 14px;
+          --font-size-md: 14px;
+          --font-size-lg: 16px;
+          --font-size-xl: 18px;
+          --font-size-2xl: 20px;
+          --font-size-3xl: 24px;
+          --font-size-4xl: 30px;
+          --font-weight-normal: 400;
+          --font-weight-medium: 500;
+          --font-weight-semibold: 550;
+          --font-weight-bold: 600;
+          --line-height-tight: 1.2;
+          --line-height-normal: 1.5;
+          --letter-spacing-tight: -0.01em;
+
+          /* Spacing */
+          --space-0: 0;
+          --space-1: 1px;
+          --space-2: 2px;
+          --space-4: 4px;
+          --space-6: 6px;
+          --space-8: 8px;
+          --space-10: 10px;
+          --space-12: 12px;
+          --space-16: 16px;
+          --space-20: 20px;
+          --space-24: 24px;
+          --space-32: 32px;
+
+          /* Border Radius */
+          --radius-sm: 6px;
+          --radius-base: 8px;
+          --radius-md: 10px;
+          --radius-lg: 12px;
+          --radius-full: 9999px;
+
+          /* Shadows */
+          --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+          --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+          --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04),
+            0 2px 4px -1px rgba(0, 0, 0, 0.02);
+          --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04),
+            0 4px 6px -2px rgba(0, 0, 0, 0.02);
+          --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.15),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+
+          /* Animation */
+          --duration-fast: 150ms;
+          --duration-normal: 250ms;
+          --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+          /* Layout */
+          --container-sm: 640px;
+          --container-md: 768px;
+          --container-lg: 1024px;
+          --container-xl: 1280px;
+        }
+
+        /* Dark mode colors */
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --color-background: var(--color-charcoal-700);
+            --color-surface: var(--color-charcoal-800);
+            --color-text: var(--color-gray-200);
+            --color-primary: var(--color-teal-300);
+            --color-border: rgba(119, 124, 124, 0.3);
+            /* ... other dark mode variables ... */
+          }
+        }
+
+        /* Base styles */
+        html {
+          font-size: var(--font-size-base);
+          font-family: var(--font-family-base);
+          line-height: var(--line-height-normal);
+          color: var(--color-text);
+          background-color: var(--color-background);
+          -webkit-font-smoothing: antialiased;
+          box-sizing: border-box;
+        }
+
+        body {
+          margin: 0;
+          padding: 0;
+        }
+
+        *,
+        *::before,
+        *::after {
+          box-sizing: inherit;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+          margin: 0;
+          font-weight: var(--font-weight-semibold);
+          line-height: var(--line-height-tight);
+          color: var(--color-text);
+          letter-spacing: var(--letter-spacing-tight);
+        }
+        h1 { font-size: var(--font-size-4xl); }
+        h2 { font-size: var(--font-size-3xl); }
+        h3 { font-size: var(--font-size-2xl); }
+
+        /* Buttons */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: var(--space-8) var(--space-16);
+          border-radius: var(--radius-base);
+          font-size: var(--font-size-base);
+          font-weight: 500;
+          line-height: 1.5;
+          cursor: pointer;
+          transition: all var(--duration-normal) var(--ease-standard);
+          border: none;
+          text-decoration: none;
+          position: relative;
+        }
+        .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+        .btn--primary { background: var(--color-primary); color: var(--color-btn-primary-text); }
+        .btn--primary:hover { background: var(--color-primary-hover); }
+        .btn--secondary { background: var(--color-secondary); color: var(--color-text); }
+        .btn--secondary:hover { background: var(--color-secondary-hover); }
+        .btn--danger { background: var(--color-error); color: var(--color-white); }
+        .btn--danger:hover { background: var(--color-red-400); }
+        .btn--outline { background: transparent; border: 1px solid var(--color-border); color: var(--color-text); }
+        .btn--outline:hover { background: var(--color-secondary); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Form elements */
+        .form-control {
+          display: block;
+          width: 100%;
+          padding: var(--space-8) var(--space-12);
+          font-size: var(--font-size-md);
+          line-height: 1.5;
+          color: var(--color-text);
+          background-color: var(--color-surface);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-base);
+          transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+        }
+        select.form-control {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: var(--select-caret-light);
+            background-repeat: no-repeat;
+            background-position: right var(--space-12) center;
+            background-size: 16px;
+            padding-right: var(--space-32);
+        }
+        .form-control:focus { border-color: var(--color-primary); outline: var(--focus-outline); }
+        .form-label { display: block; margin-bottom: var(--space-8); font-weight: var(--font-weight-medium); font-size: var(--font-size-sm); }
+        .form-group { margin-bottom: var(--space-16); }
+
+        /* Application-specific styles */
+        .app-container {
+          display: grid;
+          grid-template-rows: auto 1fr auto;
+          height: 100vh;
+          background-color: var(--color-background);
+        }
+
+        /* Header */
+        .app-header {
+          background-color: var(--color-surface);
+          border-bottom: 1px solid var(--color-border);
+          padding: var(--space-16) var(--space-24);
+          box-shadow: var(--shadow-sm);
+          z-index: 10;
+        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: var(--container-xl); margin: 0 auto; }
+        .app-title { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-text); margin: 0; }
+        .status-indicators { display: flex; gap: var(--space-16); align-items: center; }
+        .status { display: inline-flex; align-items: center; padding: var(--space-6) var(--space-12); border-radius: var(--radius-full); font-weight: var(--font-weight-medium); font-size: var(--font-size-sm); border: 1px solid transparent; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: var(--space-8); background-color: currentColor; opacity: 0.6; }
+
+        .status--success { background-color: rgba(var(--color-success-rgb), var(--status-bg-opacity)); color: var(--color-success); border-color: rgba(var(--color-success-rgb), var(--status-border-opacity)); }
+        .status--error { background-color: rgba(var(--color-error-rgb), var(--status-bg-opacity)); color: var(--color-error); border-color: rgba(var(--color-error-rgb), var(--status-border-opacity)); }
+        .status--warning { background-color: rgba(var(--color-warning-rgb), var(--status-bg-opacity)); color: var(--color-warning); border-color: rgba(var(--color-warning-rgb), var(--status-border-opacity)); }
+        .status--info { background-color: rgba(var(--color-info-rgb), var(--status-bg-opacity)); color: var(--color-info); border-color: rgba(var(--color-info-rgb), var(--status-border-opacity)); }
+
+        /* Main Content */
+        .main-content {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: var(--space-24);
+          padding: var(--space-24);
+          max-width: var(--container-xl);
+          margin: 0 auto;
+          width: 100%;
+          overflow: hidden;
+          min-height: 0;
+        }
+
+        /* Camera Section */
+        .camera-section { display: flex; flex-direction: column; gap: var(--space-16); min-height: 0; }
+        .camera-container {
+          position: relative;
+          background-color: var(--color-black);
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--color-border);
+          overflow: hidden;
+          aspect-ratio: 16/9;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .camera-placeholder {
+            display: flex; align-items: center; justify-content: center;
+            height: 100%; width: 100%; background: var(--color-surface);
+            color: var(--color-text-secondary); position: absolute; top: 0; left: 0; z-index: 1;
+        }
+        .camera-placeholder.hidden { display: none; }
+        .placeholder-content { text-align: center; }
+        .camera-icon { font-size: 4rem; margin-bottom: var(--space-16); opacity: 0.5; }
+
+        #camera-feed { width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; top: 0; left: 0; z-index: 2; }
+        #camera-feed.active { display: block; }
+        #overlay-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
+        #qr-scanner-region { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; }
+
+        /* Camera Controls */
+        .camera-controls { display: flex; justify-content: space-between; align-items: end; gap: var(--space-16); padding: var(--space-16); background-color: var(--color-surface); border-radius: var(--radius-lg); border: 1px solid var(--color-border); }
+        .control-group { flex: 1; max-width: 250px; }
+        .control-buttons { display: flex; gap: var(--space-8); }
+
+        /* Control Panel */
+        .control-panel { display: flex; flex-direction: column; gap: var(--space-20); background-color: var(--color-surface); padding: var(--space-20); border-radius: var(--radius-lg); border: 1px solid var(--color-border); max-height: calc(100vh - 160px); overflow-y: auto; }
+        .panel-section h3 { margin: 0; font-size: var(--font-size-lg); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-8); }
+        .instruction-text { padding: var(--space-12); background-color: var(--color-bg-2); border-radius: var(--radius-base); border-left: 3px solid var(--color-warning); margin-top: 8px;}
+        .instruction-text p { margin: 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+
+        /* Data Lists */
+        .data-list { max-height: 200px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: var(--radius-base); background-color: var(--color-background); }
+        .data-item { padding: var(--space-12); border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; font-size: var(--font-size-sm); }
+        .data-item:last-child { border-bottom: none; }
+        .data-item-title { font-weight: var(--font-weight-medium); color: var(--color-text); margin-bottom: var(--space-2); }
+        .data-item-subtitle { color: var(--color-text-secondary); font-size: var(--font-size-xs); }
+        .data-item-actions button {
+            padding: var(--space-2) var(--space-6); font-size: var(--font-size-xs); border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border); background: transparent; color: var(--color-text-secondary); cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-standard);
+        }
+        .data-item-actions button:hover { background-color: var(--color-secondary); color: var(--color-text); }
+        .no-data { padding: var(--space-16); text-align: center; color: var(--color-text-secondary); font-style: italic; margin: 0; }
+
+        /* Footer */
+        .app-footer { background-color: var(--color-surface); border-top: 1px solid var(--color-border); padding: var(--space-12) var(--space-24); }
+        .footer-stats { display: flex; justify-content: center; gap: var(--space-24); font-size: var(--font-size-sm); color: var(--color-text-secondary); max-width: var(--container-xl); margin: 0 auto; flex-wrap: wrap; }
+
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .modal.hidden { display: none !important; }
+        .modal-backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
+        .modal-content { position: relative; background-color: var(--color-surface); border-radius: var(--radius-lg); border: 1px solid var(--color-border); box-shadow: var(--shadow-lg); max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; z-index: 1001; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-20); border-bottom: 1px solid var(--color-border); }
+        .modal-close { background: none; border: none; font-size: var(--font-size-2xl); color: var(--color-text-secondary); cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-base); transition: all var(--duration-fast) var(--ease-standard); }
+        .modal-close:hover { background-color: var(--color-secondary); color: var(--color-text); }
+        .modal-body { padding: var(--space-20); max-height: 60vh; overflow-y: auto; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: var(--space-12); padding: var(--space-20); border-top: 1px solid var(--color-border); background-color: var(--color-background); }
+        .modal-body p { margin-bottom: 0; }
+
+        /* Notification */
+        .notification {
+            position: fixed; top: 20px; right: 20px; padding: 12px 16px; border-radius: 8px; color: white;
+            font-weight: 500; z-index: 10000; max-width: 300px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: opacity 0.3s ease, transform 0.3s ease; opacity: 0; transform: translateX(20px); pointer-events: none;
+        }
+        .notification.show { opacity: 1; transform: translateX(0); pointer-events: all; }
+        .notification--success { background-color: var(--color-success); }
+        .notification--error { background-color: var(--color-error); }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+          .main-content { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+          .control-panel { order: 2; max-height: none; }
+          .camera-section { order: 1; }
+        }
+        @media (max-width: 768px) {
+          .header-content { flex-direction: column; gap: var(--space-12); align-items: flex-start; }
+          .camera-controls { flex-direction: column; align-items: stretch; }
+          .main-content { padding: var(--space-16); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">Object Tracker & QR Code Detector</h1>
+                <div class="status-indicators">
+                    <div class="status status--info" id="camera-status"><span class="status-dot"></span>Camera: Disconnected</div>
+                    <div class="status status--info" id="qr-status"><span class="status-dot"></span>QR Scanner: Idle</div>
+                    <div class="status status--info" id="tracking-status"><span class="status-dot"></span>Tracking: Inactive</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Camera Feed Section -->
+            <section class="camera-section">
+                <div class="camera-container">
+                    <div class="camera-placeholder" id="camera-placeholder">
+                        <div class="placeholder-content">
+                            <div class="camera-icon">📷</div>
+                            <h3>Camera Feed</h3>
+                            <p>Grant camera permission and start to begin</p>
+                        </div>
+                    </div>
+                    <video id="camera-feed" autoplay muted playsinline></video>
+                    <canvas id="overlay-canvas"></canvas>
+                    <div id="qr-scanner-region"></div>
+                </div>
+                
+                <div class="camera-controls">
+                    <div class="control-group">
+                        <label for="camera-select" class="form-label">Camera Device</label>
+                        <select id="camera-select" class="form-control"><option value="">Select Camera</option></select>
+                    </div>
+                    <div class="control-buttons">
+                        <button id="start-camera" class="btn btn--primary">Start Camera</button>
+                        <button id="stop-camera" class="btn btn--secondary" disabled>Stop Camera</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <aside class="control-panel">
+                <div class="panel-section">
+                    <h3>Object Tracking</h3>
+                    <button id="start-tracking" class="btn btn--secondary" disabled>Start Tracking</button>
+                    <div class="instruction-text">
+                        <p>After starting tracking, click on objects in the video feed to track them by color.</p>
+                    </div>
+                    <h4>Tracked Objects</h4>
+                    <div id="object-list" class="data-list"><p class="no-data">No objects being tracked</p></div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>QR Code Detection</h3>
+                    <button id="start-qr-scan" class="btn btn--outline" disabled>Start QR Scan</button>
+                     <h4>Detected QR Codes</h4>
+                    <div id="qr-list" class="data-list"><p class="no-data">No QR codes detected</p></div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Associations</h3>
+                    <button id="create-association" class="btn btn--sm btn--secondary" disabled>Create Association</button>
+                    <div id="association-list" class="data-list"><p class="no-data">No associations created</p></div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Session Data</h3>
+                    <div class="control-buttons">
+                        <button id="export-data" class="btn btn--outline">Export Data</button>
+                        <button id="clear-session" class="btn btn--outline">Clear Session</button>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-stats">
+                <span id="session-duration">Session: 00:00:00</span>
+                <span id="objects-count">Objects: 0</span>
+                <span id="qr-count">QR Codes: 0</span>
+                <span id="associations-count">Associations: 0</span>
+                <span id="fps-counter">FPS: 0</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="association-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Association</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="association-qr-select" class="form-label">QR Code</label>
+                    <select id="association-qr-select" class="form-control"><option value="">Select QR Code</option></select>
+                </div>
+                <div class="form-group">
+                    <label for="association-object-select" class="form-label">Object</label>
+                    <select id="association-object-select" class="form-control"><option value="">Select Object</option></select>
+                </div>
+                <div class="form-group">
+                    <label for="association-notes" class="form-label">Notes (Optional)</label>
+                    <textarea id="association-notes" class="form-control" rows="3" placeholder="Add any notes"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-association" class="btn btn--primary">Create Association</button>
+                <button class="modal-cancel btn btn--secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="confirm-title">Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message">Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-ok" class="btn btn--danger">Confirm</button>
+                <button id="confirm-cancel" class="btn btn--secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+class ObjectTracker {
+    constructor() {
+        // Core components
+        this.video = document.getElementById('camera-feed');
+        this.canvas = document.getElementById('overlay-canvas');
+        this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+        this.qrScanner = null;
+        this.animationFrameId = null;
+
+        // State
+        this.isCameraActive = false;
+        this.isTracking = false;
+        this.isQRScanning = false;
+        this.colorTolerance = 30; // Tolerance for color matching
+
+        // Data stores
+        this.detectedObjects = new Map();
+        this.detectedQRCodes = new Map();
+        this.associations = new Map();
+        
+        // Session & performance tracking
+        this.sessionStart = null;
+        this.objectCounter = 0;
+        this.qrCounter = 0;
+        this.frameCount = 0;
+        this.lastFPSUpdate = 0;
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupDOM();
+        this.getCameraDevices();
+        this.setupEventListeners();
+        this.startSessionTimer();
+        this.updateStats();
+    }
+    
+    setupDOM() {
+        this.cameraSelect = document.getElementById('camera-select');
+        this.cameraPlaceholder = document.getElementById('camera-placeholder');
+        this.cameraStatus = document.getElementById('camera-status');
+        this.qrStatus = document.getElementById('qr-status');
+        this.trackingStatus = document.getElementById('tracking-status');
+        this.qrList = document.getElementById('qr-list');
+        this.objectList = document.getElementById('object-list');
+        this.associationList = document.getElementById('association-list');
+        this.sessionDuration = document.getElementById('session-duration');
+        this.objectsCount = document.getElementById('objects-count');
+        this.qrCount = document.getElementById('qr-count');
+        this.associationsCount = document.getElementById('associations-count');
+        this.fpsCounter = document.getElementById('fps-counter');
+        
+        // Buttons
+        this.btnStartCamera = document.getElementById('start-camera');
+        this.btnStopCamera = document.getElementById('stop-camera');
+        this.btnStartTracking = document.getElementById('start-tracking');
+        this.btnStartQRScan = document.getElementById('start-qr-scan');
+    }
+    
+    async getCameraDevices() {
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            this.cameraSelect.innerHTML = '<option value="">Select Camera</option>';
+            videoDevices.forEach((camera, index) => {
+                const option = new Option(camera.label || `Camera ${index + 1}`, camera.deviceId);
+                this.cameraSelect.add(option);
+            });
+            if (videoDevices.length === 0) this.showNotification('No cameras found', 'error');
+        } catch (error) {
+            this.showNotification('Could not list camera devices.', 'error');
+        }
+    }
+    
+    setupEventListeners() {
+        // Main controls
+        this.btnStartCamera.addEventListener('click', () => this.startCamera());
+        this.btnStopCamera.addEventListener('click', () => this.stopCamera());
+        this.btnStartTracking.addEventListener('click', () => this.toggleTracking());
+        this.btnStartQRScan.addEventListener('click', () => this.toggleQRScanning());
+        
+        // Session controls
+        document.getElementById('export-data').addEventListener('click', () => this.exportData());
+        document.getElementById('clear-session').addEventListener('click', () => this.confirmClearSession());
+
+        // Association Modal
+        document.getElementById('create-association').addEventListener('click', () => this.showAssociationModal());
+        document.getElementById('save-association').addEventListener('click', () => this.saveAssociation());
+        document.getElementById('association-modal').querySelector('.modal-close').addEventListener('click', () => this.hideAssociationModal());
+        document.getElementById('association-modal').querySelector('.modal-cancel').addEventListener('click', () => this.hideAssociationModal());
+        
+        // Video click for object selection
+        this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+        
+        // Event Delegation for dynamic lists
+        this.objectList.addEventListener('click', (e) => this.handleListClick(e, 'object'));
+        this.qrList.addEventListener('click', (e) => this.handleListClick(e, 'qr'));
+        this.associationList.addEventListener('click', (e) => this.handleListClick(e, 'association'));
+
+        window.addEventListener('resize', () => this.handleResize());
+
+        // Refresh camera list when devices change
+        if (navigator.mediaDevices) {
+            if ('addEventListener' in navigator.mediaDevices) {
+                navigator.mediaDevices.addEventListener('devicechange', () => this.getCameraDevices());
+            } else if ('ondevicechange' in navigator.mediaDevices) {
+                navigator.mediaDevices.ondevicechange = () => this.getCameraDevices();
+            }
+        }
+    }
+    
+    async startCamera() {
+        if (!this.cameraSelect.value) {
+            // Attempt to prompt permission and auto-select a device
+            try {
+                const temp = await navigator.mediaDevices.getUserMedia({ video: true });
+                temp.getTracks().forEach(t => t.stop());
+                await this.getCameraDevices();
+                const first = this.cameraSelect.options[1];
+                if (first) {
+                    this.cameraSelect.value = first.value;
+                } else {
+                    this.showNotification('No cameras available. Use HTTPS/localhost and check permissions.', 'error');
+                    return;
+                }
+            } catch (e) {
+                this.showNotification('Please allow camera access to continue.', 'error');
+                return;
+            }
+        }
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    deviceId: { exact: this.cameraSelect.value },
+                    width: { ideal: 1280 }, height: { ideal: 720 }
+                }
+            });
+            this.video.srcObject = stream;
+            await this.video.play();
+            
+            this.isCameraActive = true;
+            this.setupCanvas();
+            this.cameraPlaceholder.classList.add('hidden');
+            this.video.classList.add('active');
+            
+            this.updateCameraStatus('Connected', 'success');
+            this.btnStartCamera.disabled = true;
+            this.btnStopCamera.disabled = false;
+            this.btnStartTracking.disabled = false;
+            this.btnStartQRScan.disabled = false;
+            
+            this.startMainLoop();
+        } catch (error) {
+            this.showNotification('Failed to start camera', 'error');
+            this.updateCameraStatus('Failed', 'error');
+        }
+    }
+    
+    stopCamera() {
+        if (this.video.srcObject) {
+            this.video.srcObject.getTracks().forEach(track => track.stop());
+        }
+        this.isCameraActive = false;
+        if (this.isTracking) this.toggleTracking();
+        if (this.isQRScanning) this.toggleQRScanning(true);
+        cancelAnimationFrame(this.animationFrameId);
+
+        this.cameraPlaceholder.classList.remove('hidden');
+        this.video.classList.remove('active');
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.updateCameraStatus('Disconnected', 'info');
+        this.btnStartCamera.disabled = false;
+        this.btnStopCamera.disabled = true;
+        this.btnStartTracking.disabled = true;
+        this.btnStartQRScan.disabled = true;
+
+        this.confirmAction("Do you want to clear all session data?", () => this.clearSession());
+    }
+
+    toggleTracking() {
+        this.isTracking = !this.isTracking;
+        this.btnStartTracking.textContent = this.isTracking ? 'Stop Tracking' : 'Start Tracking';
+        this.updateTrackingStatus(this.isTracking ? 'Active' : 'Inactive', this.isTracking ? 'success' : 'info');
+        if (!this.isTracking) {
+             this.detectedObjects.clear();
+             this.updateObjectList();
+             this.updateStats();
+        }
+    }
+
+    async toggleQRScanning(forceStop = false) {
+        if (forceStop || this.isQRScanning) {
+            if (this.qrScanner) {
+                try {
+                    await this.qrScanner.stop();
+                    this.qrScanner = null;
+                } catch (e) { /* ignore */ }
+            }
+            this.isQRScanning = false;
+            this.btnStartQRScan.textContent = 'Start QR Scan';
+            this.updateQRStatus('Idle', 'info');
+        } else {
+            this.isQRScanning = true;
+            this.btnStartQRScan.textContent = 'Stop QR Scan';
+            this.updateQRStatus('Scanning', 'success');
+            this.qrScanner = new Html5Qrcode("qr-scanner-region");
+            this.qrScanner.start(
+                this.cameraSelect.value, 
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (text, result) => this.handleQRCodeDetected(text, result),
+                (err) => { /* ignore scan errors */ }
+            ).catch(err => {
+                this.showNotification('Failed to start QR scanner', 'error');
+                this.toggleQRScanning(); // Revert state
+            });
+        }
+    }
+    
+    startMainLoop() {
+        this.updateFPS();
+        
+        if (this.isTracking) {
+             this.trackObjects();
+        }
+        
+        this.drawOverlays();
+        
+        this.animationFrameId = requestAnimationFrame(() => this.startMainLoop());
+    }
+
+    // ========================================================================
+    // == OBJECT TRACKING LOGIC (NEW IMPLEMENTATION) ==
+    // ========================================================================
+    handleCanvasClick(e) {
+        if (!this.isTracking) return;
+
+        const rect = this.canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) * (this.canvas.width / rect.width));
+        const y = Math.floor((e.clientY - rect.top) * (this.canvas.height / rect.height));
+
+        this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+        const pixelData = this.ctx.getImageData(x, y, 1, 1).data;
+        const color = { r: pixelData[0], g: pixelData[1], b: pixelData[2] };
+
+        this.createTrackedObject(x, y, color);
+    }
+    
+    createTrackedObject(x, y, color) {
+        this.objectCounter++;
+        const id = `obj_${this.objectCounter}`;
+        
+        const obj = {
+            id,
+            type: 'color_track',
+            targetColor: color,
+            position: { x, y, width: 50, height: 50 }, // Initial guess
+            timestamp: new Date().toISOString(),
+        };
+        
+        this.detectedObjects.set(id, obj);
+        this.updateObjectList();
+        this.updateStats();
+        this.updateAssociationControls();
+        this.showNotification(`Tracking new object by color`, 'success');
+    }
+    
+    trackObjects() {
+        if (this.detectedObjects.size === 0) return;
+        
+        this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+        const frameData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.detectedObjects.forEach(obj => {
+            const searchRect = {
+                x: Math.max(0, obj.position.x - 50),
+                y: Math.max(0, obj.position.y - 50),
+                width: obj.position.width + 100,
+                height: obj.position.height + 100,
+            };
+
+            let minX = this.canvas.width, minY = this.canvas.height, maxX = 0, maxY = 0;
+            let pixelCount = 0;
+
+            for (let y = searchRect.y; y < searchRect.y + searchRect.height; y++) {
+                for (let x = searchRect.x; x < searchRect.x + searchRect.width; x++) {
+                    const i = (y * this.canvas.width + x) * 4;
+                    const r = frameData.data[i];
+                    const g = frameData.data[i+1];
+                    const b = frameData.data[i+2];
+
+                    const distance = Math.sqrt(
+                        Math.pow(r - obj.targetColor.r, 2) +
+                        Math.pow(g - obj.targetColor.g, 2) +
+                        Math.pow(b - obj.targetColor.b, 2)
+                    );
+
+                    if (distance < this.colorTolerance) {
+                        minX = Math.min(minX, x);
+                        minY = Math.min(minY, y);
+                        maxX = Math.max(maxX, x);
+                        maxY = Math.max(maxY, y);
+                        pixelCount++;
+                    }
+                }
+            }
+            
+            if (pixelCount > 20) { // Threshold to avoid noise
+                obj.position.x = minX;
+                obj.position.y = minY;
+                obj.position.width = maxX - minX;
+                obj.position.height = maxY - minY;
+            }
+        });
+    }
+
+    // ========================================================================
+    // == QR CODE & OVERLAY DRAWING (IMPROVED) ==
+    // ========================================================================
+    handleQRCodeDetected(decodedText, decodedResult) {
+        const existingQR = Array.from(this.detectedQRCodes.values()).find(qr => qr.content === decodedText);
+        if (existingQR) return; // Simple debounce
+        
+        this.qrCounter++;
+        const id = `qr_${this.qrCounter}`;
+
+        // IMPROVEMENT: Use the actual detected location for the bounding box
+        const qrBox = decodedResult.result.box;
+        const qr = {
+            id,
+            content: decodedText,
+            position: {
+                x: qrBox.x, y: qrBox.y,
+                width: qrBox.width, height: qrBox.height,
+            },
+            timestamp: new Date().toISOString(),
+            format: decodedResult.result.format.formatName
+        };
+        
+        this.detectedQRCodes.set(id, qr);
+        this.updateQRList();
+        this.updateStats();
+        this.updateAssociationControls();
+        this.showNotification(`QR code detected`, 'success');
+    }
+
+    drawOverlays() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        const scaleX = this.canvas.clientWidth / this.video.videoWidth;
+        const scaleY = this.canvas.clientHeight / this.video.videoHeight;
+
+        this.detectedObjects.forEach(obj => this.drawBox(obj, scaleX, scaleY, 'object'));
+        this.detectedQRCodes.forEach(qr => this.drawBox(qr, scaleX, scaleY, 'qr'));
+        this.associations.forEach(assoc => this.drawAssociationLine(assoc, scaleX, scaleY));
+    }
+    
+    drawBox(item, scaleX, scaleY, type) {
+        const x = item.position.x * scaleX;
+        const y = item.position.y * scaleY;
+        const width = item.position.width * scaleX;
+        const height = item.position.height * scaleY;
+
+        const isObject = type === 'object';
+        const color = isObject ? 'var(--color-primary)' : 'var(--color-success)';
+        const label = isObject ? `Object ${item.id.split('_')[1]}` : item.content.substring(0, 15);
+
+        this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(x, y, width, height);
+        
+        this.ctx.fillStyle = color;
+        this.ctx.font = '12px ' + getComputedStyle(document.body).fontFamily;
+        const textWidth = this.ctx.measureText(label).width;
+        this.ctx.fillRect(x, y - 20, textWidth + 10, 20);
+        this.ctx.fillStyle = isObject ? 'var(--color-btn-primary-text)' : 'white';
+        this.ctx.fillText(label, x + 5, y - 6);
+    }
+    
+    drawAssociationLine(assoc, scaleX, scaleY) {
+        const obj = this.detectedObjects.get(assoc.object_id);
+        const qr = this.detectedQRCodes.get(assoc.qr_code_id);
+        if (!obj || !qr) return;
+
+        const objCenterX = (obj.position.x + obj.position.width / 2) * scaleX;
+        const objCenterY = (obj.position.y + obj.position.height / 2) * scaleY;
+        const qrCenterX = (qr.position.x + qr.position.width / 2) * scaleX;
+        const qrCenterY = (qr.position.y + qr.position.height / 2) * scaleY;
+        
+        this.ctx.strokeStyle = 'var(--color-warning)';
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([5, 5]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(objCenterX, objCenterY);
+        this.ctx.lineTo(qrCenterX, qrCenterY);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+    }
+
+    // ========================================================================
+    // == UI & DATA MANAGEMENT (REFACTORED) ==
+    // ========================================================================
+    
+    // REFACTOR: Use event delegation for list item clicks.
+    handleListClick(event, type) {
+        const button = event.target.closest('button[data-action="remove"]');
+        if (button) {
+            const id = button.dataset.id;
+            switch(type) {
+                case 'object': this.removeObject(id); break;
+                case 'qr': this.removeQRCode(id); break;
+                case 'association': this.removeAssociation(id); break;
+            }
+        }
+    }
+
+    updateList(element, items, renderer) {
+        if (items.size === 0) {
+            element.innerHTML = `<p class="no-data">${element.dataset.emptyText}</p>`;
+        } else {
+            element.innerHTML = Array.from(items.values()).map(renderer).join('');
+        }
+    }
+
+    updateObjectList() {
+        this.updateList(this.objectList, this.detectedObjects, obj => `
+            <div class="data-item">
+                <div>
+                    <div class="data-item-title">Object ${obj.id.split('_')[1]}</div>
+                    <div class="data-item-subtitle">${new Date(obj.timestamp).toLocaleTimeString()}</div>
+                </div>
+                <div class="data-item-actions">
+                    <button data-action="remove" data-id="${obj.id}">Remove</button>
+                </div>
+            </div>`);
+    }
+    
+    updateQRList() {
+        this.updateList(this.qrList, this.detectedQRCodes, qr => `
+            <div class="data-item">
+                <div>
+                    <div class="data-item-title">${qr.content.substring(0, 25)}...</div>
+                    <div class="data-item-subtitle">${new Date(qr.timestamp).toLocaleTimeString()}</div>
+                </div>
+                <div class="data-item-actions">
+                    <button data-action="remove" data-id="${qr.id}">Remove</button>
+                </div>
+            </div>`);
+    }
+
+    updateAssociationList() {
+        this.updateList(this.associationList, this.associations, assoc => {
+            const objName = `Object ${assoc.object_id.split('_')[1]}`;
+            const qr = this.detectedQRCodes.get(assoc.qr_code_id);
+            const qrName = qr ? `${qr.content.substring(0, 15)}...` : 'Unknown QR';
+            return `
+                <div class="data-item">
+                    <div>
+                        <div class="data-item-title">${objName} ↔ ${qrName}</div>
+                        <div class="data-item-subtitle">${new Date(assoc.timestamp).toLocaleTimeString()}</div>
+                    </div>
+                    <div class="data-item-actions">
+                        <button data-action="remove" data-id="${assoc.id}">Remove</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    removeObject(id) {
+        this.detectedObjects.delete(id);
+        this.associations.forEach(assoc => {
+            if (assoc.object_id === id) this.associations.delete(assoc.id);
+        });
+        this.updateObjectList();
+        this.updateAssociationList();
+        this.updateStatsAndControls();
+    }
+    
+    removeQRCode(id) {
+        this.detectedQRCodes.delete(id);
+        this.associations.forEach(assoc => {
+            if (assoc.qr_code_id === id) this.associations.delete(assoc.id);
+        });
+        this.updateQRList();
+        this.updateAssociationList();
+        this.updateStatsAndControls();
+    }
+    
+    removeAssociation(id) {
+        this.associations.delete(id);
+        this.updateAssociationList();
+        this.updateStats();
+    }
+
+    confirmClearSession() {
+        this.confirmAction(
+            "Are you sure you want to clear all session data? This cannot be undone.",
+            () => this.clearSession()
+        );
+    }
+    
+    clearSession() {
+        this.detectedObjects.clear();
+        this.detectedQRCodes.clear();
+        this.associations.clear();
+        this.objectCounter = 0;
+        this.qrCounter = 0;
+        this.updateObjectList();
+        this.updateQRList();
+        this.updateAssociationList();
+        this.updateStatsAndControls();
+        this.sessionStart = new Date();
+        this.showNotification('Session data cleared', 'success');
+    }
+
+    // ========================================================================
+    // == UTILITIES, MODALS, AND HELPERS ==
+    // ========================================================================
+    
+    confirmAction(message, onConfirm) {
+        const modal = document.getElementById('confirm-modal');
+        modal.querySelector('#confirm-message').textContent = message;
+        
+        const okButton = modal.querySelector('#confirm-ok');
+        const cancelButton = modal.querySelector('#confirm-cancel');
+        
+        const close = () => modal.classList.add('hidden');
+        
+        const confirmHandler = () => {
+            onConfirm();
+            close();
+        };
+        
+        const cancelHandler = () => close();
+
+        // Use .cloneNode to remove old event listeners
+        const newOk = okButton.cloneNode(true);
+        okButton.parentNode.replaceChild(newOk, okButton);
+        newOk.addEventListener('click', confirmHandler, { once: true });
+        
+        const newCancel = cancelButton.cloneNode(true);
+        cancelButton.parentNode.replaceChild(newCancel, cancelButton);
+        newCancel.addEventListener('click', cancelHandler, { once: true });
+        
+        modal.classList.remove('hidden');
+    }
+
+    showAssociationModal() {
+        const qrSelect = document.getElementById('association-qr-select');
+        const objSelect = document.getElementById('association-object-select');
+        
+        qrSelect.innerHTML = '<option value="">Select QR Code</option>';
+        this.detectedQRCodes.forEach(qr => {
+            qrSelect.add(new Option(qr.content.substring(0, 40), qr.id));
+        });
+        
+        objSelect.innerHTML = '<option value="">Select Object</option>';
+        this.detectedObjects.forEach(obj => {
+            objSelect.add(new Option(`Object ${obj.id.split('_')[1]}`, obj.id));
+        });
+        
+        document.getElementById('association-modal').classList.remove('hidden');
+    }
+    
+    hideAssociationModal() {
+        document.getElementById('association-modal').classList.add('hidden');
+    }
+
+    saveAssociation() {
+        const qrId = document.getElementById('association-qr-select').value;
+        const objId = document.getElementById('association-object-select').value;
+        if (!qrId || !objId) {
+            this.showNotification('Please select both a QR code and an object', 'error');
+            return;
+        }
+
+        const id = `assoc_${Date.now()}`;
+        this.associations.set(id, {
+            id, qr_code_id: qrId, object_id: objId,
+            timestamp: new Date().toISOString(),
+            notes: document.getElementById('association-notes').value.trim()
+        });
+        
+        this.updateAssociationList();
+        this.updateStats();
+        this.hideAssociationModal();
+        this.showNotification('Association created', 'success');
+    }
+
+    showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification--${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.classList.add('show'), 10); // Trigger transition
+        setTimeout(() => {
+            notification.classList.remove('show');
+            notification.addEventListener('transitionend', () => notification.remove());
+        }, 4000);
+    }
+    
+    updateStatsAndControls() {
+        this.updateStats();
+        this.updateAssociationControls();
+    }
+    
+    updateStats() {
+        this.objectsCount.textContent = `Objects: ${this.detectedObjects.size}`;
+        this.qrCount.textContent = `QR Codes: ${this.detectedQRCodes.size}`;
+        this.associationsCount.textContent = `Associations: ${this.associations.size}`;
+    }
+    
+    updateAssociationControls() {
+        const canCreate = this.detectedObjects.size > 0 && this.detectedQRCodes.size > 0;
+        document.getElementById('create-association').disabled = !canCreate;
+    }
+    
+    updateCameraStatus(text, type) { this.updateStatus(this.cameraStatus, 'Camera', text, type); }
+    updateQRStatus(text, type) { this.updateStatus(this.qrStatus, 'QR Scanner', text, type); }
+    updateTrackingStatus(text, type) { this.updateStatus(this.trackingStatus, 'Tracking', text, type); }
+    updateStatus(el, prefix, text, type) {
+        el.innerHTML = `<span class="status-dot"></span>${prefix}: ${text}`;
+        el.className = `status status--${type}`;
+    }
+
+    updateFPS() {
+        this.frameCount++;
+        const now = performance.now();
+        if (now - this.lastFPSUpdate >= 1000) {
+            const fps = Math.round((this.frameCount * 1000) / (now - this.lastFPSUpdate));
+            this.fpsCounter.textContent = `FPS: ${fps}`;
+            this.frameCount = 0;
+            this.lastFPSUpdate = now;
+        }
+    }
+    
+    startSessionTimer() {
+        this.sessionStart = new Date();
+        setInterval(() => {
+            if (!this.sessionStart) return;
+            const diff = new Date() - this.sessionStart;
+            const h = Math.floor(diff / 3600000).toString().padStart(2,'0');
+            const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2,'0');
+            const s = Math.floor((diff % 60000) / 1000).toString().padStart(2,'0');
+            this.sessionDuration.textContent = `Session: ${h}:${m}:${s}`;
+        }, 1000);
+    }
+
+    setupCanvas() {
+        const rect = this.video.getBoundingClientRect();
+        this.canvas.width = this.video.videoWidth;
+        this.canvas.height = this.video.videoHeight;
+    }
+
+    handleResize() {
+        if (this.isCameraActive) this.setupCanvas();
+    }
+    
+    exportData() {
+        const data = {
+            session_start: this.sessionStart.toISOString(),
+            export_time: new Date().toISOString(),
+            objects: Array.from(this.detectedObjects.values()),
+            qr_codes: Array.from(this.detectedQRCodes.values()),
+            associations: Array.from(this.associations.values()),
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `session_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showNotification('Data exported', 'success');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = new ObjectTracker();
+});
+
+    </script>
+</body>
+</html>

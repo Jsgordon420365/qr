@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Tracker & QR Code Detector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">Object Tracker & QR Code Detector</h1>
+                <div class="status-indicators">
+                    <div class="status status--info" id="camera-status">
+                        <span class="status-dot"></span>
+                        Camera: Disconnected
+                    </div>
+                    <div class="status status--info" id="qr-status">
+                        <span class="status-dot"></span>
+                        QR Scanner: Idle
+                    </div>
+                    <div class="status status--info" id="tracking-status">
+                        <span class="status-dot"></span>
+                        Tracking: Inactive
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Camera Feed Section -->
+            <section class="camera-section">
+                <div class="camera-container">
+                    <div class="camera-placeholder" id="camera-placeholder">
+                        <div class="placeholder-content">
+                            <div class="camera-icon">📷</div>
+                            <h3>Camera Feed</h3>
+                            <p>Grant camera permission and start tracking to begin</p>
+                        </div>
+                    </div>
+                    <video id="camera-feed" autoplay muted playsinline></video>
+                    <canvas id="overlay-canvas"></canvas>
+                    <div id="qr-scanner-region"></div>
+                </div>
+                
+                <div class="camera-controls">
+                    <div class="control-group">
+                        <label for="camera-select" class="form-label">Camera Device</label>
+                        <select id="camera-select" class="form-control">
+                            <option value="">Select Camera</option>
+                        </select>
+                    </div>
+                    <div class="control-buttons">
+                        <button id="start-camera" class="btn btn--primary">Start Camera</button>
+                        <button id="stop-camera" class="btn btn--secondary" disabled>Stop Camera</button>
+                        <button id="start-tracking" class="btn btn--secondary" disabled>Start Tracking</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <aside class="control-panel">
+                <div class="panel-section">
+                    <h3>QR Code Detection</h3>
+                    <div class="qr-controls">
+                        <button id="start-qr-scan" class="btn btn--outline" disabled>Start QR Scan</button>
+                        <button id="stop-qr-scan" class="btn btn--outline" disabled>Stop QR Scan</button>
+                    </div>
+                    <div class="detected-qr-codes">
+                        <h4>Detected QR Codes</h4>
+                        <div id="qr-list" class="data-list">
+                            <p class="no-data">No QR codes detected</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Object Tracking</h3>
+                    <div class="tracking-controls">
+                        <div class="instruction-text">
+                            <p>Click on objects in the video feed to start tracking</p>
+                        </div>
+                    </div>
+                    <div class="tracked-objects">
+                        <h4>Tracked Objects</h4>
+                        <div id="object-list" class="data-list">
+                            <p class="no-data">No objects being tracked</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Associations</h3>
+                    <div class="associations">
+                        <button id="create-association" class="btn btn--sm btn--secondary" disabled>Create Association</button>
+                        <div id="association-list" class="data-list">
+                            <p class="no-data">No associations created</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Session Data</h3>
+                    <div class="session-controls">
+                        <button id="export-data" class="btn btn--outline">Export Data</button>
+                        <button id="clear-session" class="btn btn--outline">Clear Session</button>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-stats">
+                <span id="session-duration">Session: 00:00:00</span>
+                <span id="objects-count">Objects: 0</span>
+                <span id="qr-count">QR Codes: 0</span>
+                <span id="associations-count">Associations: 0</span>
+                <span id="fps-counter">FPS: 0</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Association Modal -->
+    <div id="association-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Association</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="association-qr-select" class="form-label">QR Code</label>
+                    <select id="association-qr-select" class="form-control">
+                        <option value="">Select QR Code</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="association-object-select" class="form-label">Object</label>
+                    <select id="association-object-select" class="form-control">
+                        <option value="">Select Object</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="association-notes" class="form-label">Notes (Optional)</label>
+                    <textarea id="association-notes" class="form-control" rows="3" placeholder="Add any notes about this association"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-association" class="btn btn--primary">Create Association</button>
+                <button class="modal-cancel btn btn--secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="app.js"></script>
+</body>
+</html>

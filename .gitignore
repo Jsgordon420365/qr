@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node / tooling
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build/Cache
+.dist/
+.cache/
+coverage/
+
+# Local env
+*.local
+*.env
+.env.*
+
+# Generated exports
+session_*.json
+object_tracking_session_*.json
