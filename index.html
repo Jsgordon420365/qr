@@ -706,6 +706,8 @@ class ObjectTracker {
         this.isTracking = !this.isTracking;
         this.btnStartTracking.textContent = this.isTracking ? 'Stop Tracking' : 'Start Tracking';
         this.updateTrackingStatus(this.isTracking ? 'Active' : 'Inactive', this.isTracking ? 'success' : 'info');
+        // Enable clicking on the overlay canvas only while tracking
+        this.canvas.style.pointerEvents = this.isTracking ? 'auto' : 'none';
         if (!this.isTracking) {
              this.detectedObjects.clear();
              this.updateObjectList();
@@ -848,17 +850,25 @@ class ObjectTracker {
         this.qrCounter++;
         const id = `qr_${this.qrCounter}`;
 
-        // IMPROVEMENT: Use the actual detected location for the bounding box
-        const qrBox = decodedResult.result.box;
+        // Try to use result.box first; fall back to location corners; then to a default size
+        let x = 0, y = 0, width = 120, height = 120;
+        const res = decodedResult && decodedResult.result ? decodedResult.result : {};
+        if (res.box && Number.isFinite(res.box.x) && Number.isFinite(res.box.y) && Number.isFinite(res.box.width) && Number.isFinite(res.box.height)) {
+            x = res.box.x; y = res.box.y; width = res.box.width; height = res.box.height;
+        } else if (res.location && res.location.topLeftCorner && res.location.bottomRightCorner) {
+            const tl = res.location.topLeftCorner;
+            const br = res.location.bottomRightCorner;
+            if (tl && br && Number.isFinite(tl.x) && Number.isFinite(tl.y) && Number.isFinite(br.x) && Number.isFinite(br.y)) {
+                x = tl.x; y = tl.y; width = Math.max(10, br.x - tl.x); height = Math.max(10, br.y - tl.y);
+            }
+        }
+
         const qr = {
             id,
             content: decodedText,
-            position: {
-                x: qrBox.x, y: qrBox.y,
-                width: qrBox.width, height: qrBox.height,
-            },
+            position: { x, y, width, height },
             timestamp: new Date().toISOString(),
-            format: decodedResult.result.format.formatName
+            format: res.format && res.format.formatName ? res.format.formatName : 'QR_CODE'
         };
         
         this.detectedQRCodes.set(id, qr);
@@ -966,6 +976,7 @@ class ObjectTracker {
                     <div class="data-item-subtitle">${new Date(qr.timestamp).toLocaleTimeString()}</div>
                 </div>
                 <div class="data-item-actions">
+                    <button data-action="memorialize" data-id="${qr.id}">Memorialize</button>
                     <button data-action="remove" data-id="${qr.id}">Remove</button>
                 </div>
             </div>`);
